@@ -2,7 +2,9 @@
 #ifndef Py_PYTHREAD_H
 #define Py_PYTHREAD_H
 
+// GIL的原型定义
 typedef void *PyThread_type_lock;
+
 typedef void *PyThread_type_sema;
 
 #ifdef __cplusplus

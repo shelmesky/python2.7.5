@@ -75,9 +75,10 @@ whose size is determined when the object is allocated.
 #endif
 
 /* PyObject_HEAD defines the initial segment of every PyObject. */
+/* PyObject的实际定义 */
 #define PyObject_HEAD                   \
     _PyObject_HEAD_EXTRA                \
-    Py_ssize_t ob_refcnt;               \
+    Py_ssize_t ob_refcnt;               \ //引用计数
     struct _typeobject *ob_type;
 
 #define PyObject_HEAD_INIT(type)        \

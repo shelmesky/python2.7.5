@@ -354,6 +354,7 @@ PyThread_release_lock(PyThread_type_lock lock)
 
 /*
  * Lock support.
+ * 初始化锁
  */
 PyThread_type_lock
 PyThread_allocate_lock(void)
@@ -388,6 +389,11 @@ PyThread_allocate_lock(void)
     return (PyThread_type_lock) lock;
 }
 
+
+/*
+ * 销毁锁
+ */
+
 void
 PyThread_free_lock(PyThread_type_lock lock)
 {
@@ -404,6 +410,10 @@ PyThread_free_lock(PyThread_type_lock lock)
 
     free((void *)thelock);
 }
+
+/*
+ * 尝试获取锁
+ */
 
 int
 PyThread_acquire_lock(PyThread_type_lock lock, int waitflag)
@@ -439,6 +449,10 @@ PyThread_acquire_lock(PyThread_type_lock lock, int waitflag)
     return success;
 }
 
+
+/*
+ * 施放锁
+ */
 void
 PyThread_release_lock(PyThread_type_lock lock)
 {

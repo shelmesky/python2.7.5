@@ -233,7 +233,9 @@ PyEval_GetCallStats(PyObject *self)
 #endif
 #include "pythread.h"
 
+// 这个就是GIL，保护解释器级别的锁
 static PyThread_type_lock interpreter_lock = 0; /* This is the GIL */
+
 static PyThread_type_lock pending_lock = 0; /* for pending calls */
 static long main_thread = 0;
 
@@ -243,13 +245,23 @@ PyEval_ThreadsInitialized(void)
     return interpreter_lock != 0;
 }
 
+// 主线程初始化多线程环境
+// 主要就是初始化GIL
 void
 PyEval_InitThreads(void)
 {
+    // 如果已经存在了GIL，则退出
+    // 不管创建了多少个线程，只初始化一次
     if (interpreter_lock)
         return;
+    
+    // 申请锁
     interpreter_lock = PyThread_allocate_lock();
+    
+    // 获取锁
     PyThread_acquire_lock(interpreter_lock, 1);
+    
+    // 设置主线程ID
     main_thread = PyThread_get_thread_ident();
 }
 

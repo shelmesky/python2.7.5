@@ -684,7 +684,10 @@ thread_PyThread_start_new_thread(PyObject *self, PyObject *fargs)
     Py_INCREF(func);
     Py_INCREF(args);
     Py_XINCREF(keyw);
+    // 建立多线程环境
+    // 主要就是初始化GIL
     PyEval_InitThreads(); /* Start the interpreter's thread-awareness */
+    // 创建子线程
     ident = PyThread_start_new_thread(t_bootstrap, (void*) boot);
     if (ident == -1) {
         PyErr_SetString(ThreadError, "can't start new thread");
