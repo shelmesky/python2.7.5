@@ -424,23 +424,32 @@ PyThread_acquire_lock(PyThread_type_lock lock, int waitflag)
 
     dprintf(("PyThread_acquire_lock(%p, %d) called\n", lock, waitflag));
 
+    // 锁定mutex
     status = pthread_mutex_lock( &thelock->mut );
     CHECK_STATUS("pthread_mutex_lock[1]");
+    // 设置locked为0
     success = thelock->locked == 0;
 
+    // lock成功，success应该是0
+    // 如果success ==0 且 waitflag == 1
     if ( !success && waitflag ) {
         /* continue trying until we get the lock */
 
         /* mut must be locked by me -- part of the condition
          * protocol */
+	// 循环测试locked，如果为1，说明有其他线程已经获取锁
+	// 则阻塞在pthread_cond_wait上
         while ( thelock->locked ) {
             status = pthread_cond_wait(&thelock->lock_released,
                                        &thelock->mut);
             CHECK_STATUS("pthread_cond_wait");
         }
+        // 如果成功则设置success为1
         success = 1;
     }
+    // 如果条件变量等待成功则设置locked为1
     if (success) thelock->locked = 1;
+    // 释放mutex
     status = pthread_mutex_unlock( &thelock->mut );
     CHECK_STATUS("pthread_mutex_unlock[1]");
 
@@ -451,7 +460,7 @@ PyThread_acquire_lock(PyThread_type_lock lock, int waitflag)
 
 
 /*
- * 施放锁
+ * 释放锁
  */
 void
 PyThread_release_lock(PyThread_type_lock lock)
@@ -461,15 +470,19 @@ PyThread_release_lock(PyThread_type_lock lock)
 
     dprintf(("PyThread_release_lock(%p) called\n", lock));
 
+    // 获取mutex
     status = pthread_mutex_lock( &thelock->mut );
     CHECK_STATUS("pthread_mutex_lock[3]");
 
+    // 设置locked为0
     thelock->locked = 0;
 
+    // 释放mutex
     status = pthread_mutex_unlock( &thelock->mut );
     CHECK_STATUS("pthread_mutex_unlock[3]");
 
     /* wake up someone (anyone, if any) waiting on the lock */
+    // 唤醒其他在pthraad_cond_wait上的线程
     status = pthread_cond_signal( &thelock->lock_released );
     CHECK_STATUS("pthread_cond_signal");
 }
